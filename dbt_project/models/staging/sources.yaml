@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: raw
+    database: CRUISE_REVENUE_AI
+    schema: RAW
+    tables:
+      - name: STG_BOOKINGS
+        description: Raw booking records from Fivetran-simulated ingestion
+      - name: STG_GUESTS
+        description: Raw guest profile data
+      - name: STG_ONBOARD_SPEND
+        description: Raw onboard spend records per booking
+      - name: STG_PRICING_LOG
+        description: Raw weekly pricing snapshots by itinerary and cabin category

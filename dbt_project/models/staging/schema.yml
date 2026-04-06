@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: stg_bookings
+    description: Cleaned booking records from raw ingestion
+    columns:
+      - name: booking_id
+        description: Unique booking identifier
+        tests:
+          - unique
+          - not_null
+      - name: guest_id
+        tests:
+          - not_null
+      - name: brand
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Norwegian', 'Oceania', 'Regent']
+      - name: cabin_price_usd
+        tests:
+          - not_null
+
+  - name: stg_guests
+    columns:
+      - name: guest_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_onboard_spend
+    columns:
+      - name: booking_id
+        tests:
+          - not_null
+
+  - name: stg_pricing_log
+    columns:
+      - name: price_log_id
+        tests:
+          - unique
+          - not_null
