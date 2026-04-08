@@ -66,8 +66,8 @@ def generate_occupancy_summaries(conn):
             f"Total bookings were {int(row['total_bookings'])} with "
             f"{int(row['confirmed_bookings'])} confirmed and "
             f"{int(row['cancelled_bookings'])} cancelled. "
-            f"Occupancy rate was {row['avg_occupancy_pct']}% with a "
-            f"cancellation rate of {row['avg_cancellation_pct']}%. "
+            f"Occupancy rate was {row['avg_occupancy_pct']}%. "
+            f"Cancellation rate by region for {row['region']} was {row['avg_cancellation_pct']}%. "
             f"Average booking window was {int(row['avg_booking_window'])} days. "
             f"Total revenue was ${row['total_revenue']:,.2f}."
         )
@@ -150,6 +150,8 @@ def generate_pricing_summaries(conn):
             ROUND(AVG(avg_booked_price_usd), 2) as avg_booked_price,
             ROUND(AVG(price_variance_pct), 2)   as avg_price_variance_pct
         FROM MARTS.MART_PRICING_SUMMARY
+        WHERE avg_booked_price_usd IS NOT NULL
+        AND price_variance_pct IS NOT NULL
         GROUP BY 1,2,3,4,5,6
         ORDER BY 1,2,3,5,6
     """)
@@ -182,6 +184,77 @@ def generate_pricing_summaries(conn):
     return documents
 
 
+def generate_aggregate_summaries(conn):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT
+            region,
+            brand,
+            ROUND(AVG(occupancy_rate_pct), 2)    as avg_occupancy_pct,
+            ROUND(AVG(cancellation_rate_pct), 2) as avg_cancellation_pct,
+            ROUND(SUM(total_revenue_usd), 2)     as total_revenue,
+            SUM(total_bookings)                  as total_bookings,
+            ROUND(AVG(avg_booking_window_days), 0) as avg_booking_window
+        FROM MARTS.MART_OCCUPANCY
+        GROUP BY 1,2
+        ORDER BY avg_cancellation_pct DESC
+    """)
+    columns = [col[0].lower() for col in cur.description]
+    df = pd.DataFrame(cur.fetchall(), columns=columns)
+
+    documents = []
+
+    # one cross-region summary per brand
+    for brand in df['brand'].unique():
+        bdf = df[df['brand'] == brand].sort_values(
+            'avg_cancellation_pct', ascending=False
+        )
+        lines = []
+        for _, row in bdf.iterrows():
+            lines.append(
+                f"{row['region']}: cancellation rate {row['avg_cancellation_pct']}%, "
+                f"occupancy {row['avg_occupancy_pct']}%, "
+                f"avg booking window {int(row['avg_booking_window'])} days, "
+                f"total revenue ${row['total_revenue']:,.2f}"
+            )
+        text = (
+            f"{brand} brand cancellation rate and occupancy rate comparison across all regions: "
+            + " | ".join(lines)
+        )
+        documents.append({
+            "text": text,
+            "metadata": {
+                "type":  "aggregate",
+                "brand": brand,
+            }
+        })
+
+    # one single cross-brand cross-region summary
+    overall = df.groupby('region').agg(
+        avg_cancellation=('avg_cancellation_pct', 'mean'),
+        avg_occupancy=('avg_occupancy_pct', 'mean'),
+        total_revenue=('total_revenue', 'sum'),
+    ).round(2).sort_values('avg_cancellation', ascending=False).reset_index()
+
+    lines = []
+    for _, row in overall.iterrows():
+        lines.append(
+            f"{row['region']}: avg cancellation rate {row['avg_cancellation']}%, "
+            f"avg occupancy {row['avg_occupancy']}%, "
+            f"total revenue ${row['total_revenue']:,.2f}"
+        )
+    text = (
+        "Overall cancellation rate by region across all brands (ranked highest to lowest): "
+        + " | ".join(lines)
+    )
+    documents.append({
+        "text": text,
+        "metadata": {"type": "aggregate", "brand": "all"},
+    })
+
+    return documents
+
+
 def generate_all_summaries():
     print("Connecting to Snowflake...")
     conn = get_snowflake_connection()
@@ -198,12 +271,15 @@ def generate_all_summaries():
     price_docs = generate_pricing_summaries(conn)
     print(f"  {len(price_docs)} pricing documents")
 
+    print("Generating aggregate summaries...")
+    agg_docs = generate_aggregate_summaries(conn)
+    print(f"  {len(agg_docs)} aggregate documents")
+
     conn.close()
 
-    all_docs = occ_docs + rev_docs + price_docs
+    all_docs = occ_docs + rev_docs + price_docs + agg_docs
     print(f"\nTotal documents generated: {len(all_docs)}")
     return all_docs
-
 
 if __name__ == "__main__":
     docs = generate_all_summaries()
