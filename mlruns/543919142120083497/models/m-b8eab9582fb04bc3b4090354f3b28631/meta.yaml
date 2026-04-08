@@ -1,0 +1,10 @@
+artifact_location: file:///Users/nishchaychaturvedi/cruise-revenue-ai/mlruns/543919142120083497/models/m-b8eab9582fb04bc3b4090354f3b28631/artifacts
+creation_timestamp: 1775617069496
+experiment_id: '543919142120083497'
+last_updated_timestamp: 1775617071333
+model_id: m-b8eab9582fb04bc3b4090354f3b28631
+model_type: null
+name: revenue_model
+source_run_id: c1e2e7ab09024dfda3d6e666e02ae2d4
+status: 2
+status_message: null

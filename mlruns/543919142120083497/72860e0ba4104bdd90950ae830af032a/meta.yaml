@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/nishchaychaturvedi/cruise-revenue-ai/mlruns/543919142120083497/72860e0ba4104bdd90950ae830af032a/artifacts
+end_time: 1775617050787
+entry_point_name: ''
+experiment_id: '543919142120083497'
+lifecycle_stage: active
+run_id: 72860e0ba4104bdd90950ae830af032a
+run_name: cancellation_risk
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1775617031059
+status: 3
+tags: []
+user_id: nishchaychaturvedi

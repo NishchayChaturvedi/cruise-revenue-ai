@@ -1,0 +1,23 @@
+artifact_path: file:///Users/nishchaychaturvedi/cruise-revenue-ai/mlruns/543919142120083497/models/m-617e534855c343a8af4737f6411f6a42/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.11.15
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.10.1
+model_id: m-617e534855c343a8af4737f6411f6a42
+model_size_bytes: 496634
+model_uuid: m-617e534855c343a8af4737f6411f6a42
+prompts: null
+run_id: 72860e0ba4104bdd90950ae830af032a
+utc_time_created: '2026-04-08 02:57:28.567658'
