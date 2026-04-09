@@ -83,26 +83,20 @@ Synthetic dataset modeled after real cruise reservation systems:
 
 ## Project Structure
 
-cruise-revenue-ai/
-├── data/
-│   ├── generate_data.py        # Synthetic dataset generator
-│   └── load_to_snowflake.py    # Snowflake loader
-├── dbt_project/
-│   ├── models/
-│   │   ├── staging/            # 4 staging views
-│   │   └── marts/              # 4 gold tables
-│   └── macros/                 # Custom schema macro
-├── ml_models/
-│   ├── features/               # Feature engineering
-│   └── train.py                # Model training + MLflow
-├── rag_pipeline/
-│   ├── generate_summaries.py   # Snowflake → documents
-│   ├── build_vectorstore.py    # ChromaDB indexing
-│   └── rag_assistant.py        # RAG query engine
-├── agents/
-│   └── revenue_agents.py       # LangGraph agent pipeline
-└── app/
-└── main.py                 # Streamlit web app
+| Folder | File | Purpose |
+|--------|------|---------|
+| `data/` | `generate_data.py` | Synthetic dataset generator |
+| `data/` | `load_to_snowflake.py` | Snowflake loader |
+| `dbt_project/models/staging/` | `stg_*.sql` | 4 staging views |
+| `dbt_project/models/marts/` | `mart_*.sql` | 4 gold tables |
+| `dbt_project/macros/` | `generate_schema_name.sql` | Custom schema macro |
+| `ml_models/` | `train.py` | Model training + MLflow |
+| `ml_models/features/` | `feature_engineering.py` | Feature engineering |
+| `rag_pipeline/` | `generate_summaries.py` | Snowflake → documents |
+| `rag_pipeline/` | `build_vectorstore.py` | ChromaDB indexing |
+| `rag_pipeline/` | `rag_assistant.py` | RAG query engine |
+| `agents/` | `revenue_agents.py` | LangGraph agent pipeline |
+| `app/` | `main.py` | Streamlit web app |
 
 ## Setup
 
