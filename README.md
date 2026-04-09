@@ -23,34 +23,30 @@ A revenue analyst can:
 > → Recommends 25-30% price reduction with expected occupancy recovery to 85-90%
 
 ## Architecture
+```
+Layer 1 — Ingestion
+Python + Faker → 137k synthetic rows → Snowflake RAW schema
+(simulates Fivetran connector pattern with _fivetran_synced metadata)
 
-Synthetic Data (Python/Faker)
-↓
-Snowflake RAW Schema (Fivetran-style ingestion)
-↓
-dbt Transformations (Staging → Marts)
-↓
-┌───────────────────────────────┐
-│         Gold Layer            │
-│  MART_REVENUE                 │
-│  MART_OCCUPANCY               │
-│  MART_GUEST_LTV               │
-│  MART_PRICING_SUMMARY         │
-└───────────────────────────────┘
-↓                    ↓
-ML Models (MLflow)      RAG Pipeline
+Layer 2 — Transform
+dbt Core → 4 staging views → 4 gold mart tables
+MART_REVENUE · MART_OCCUPANCY · MART_GUEST_LTV · MART_PRICING_SUMMARY
 
-Cancellation Risk     - ChromaDB Vector Store
-Revenue Forecast      - 5,200 Documents
-Upsell Propensity     - Claude API
-↓                    ↓
-LangGraph Multi-Agent System
+Layer 3 — ML Models (MLflow tracked)
+Cancellation Risk Classifier  →  AUC 0.83
+Revenue per Night Regressor   →  R²  0.99
+Upsell Propensity Classifier  →  AUC 0.82
 
-Anomaly Detector
-Pricing Advisor
-Escalation Agent (HITL)
-↓
-Streamlit Web App
+Layer 4 — RAG Pipeline
+Snowflake marts → 5,200 natural language documents
+→ ChromaDB vector store → Claude API → synthesized answers
+
+Layer 5 — Agentic AI (LangGraph)
+Anomaly Detector → Pricing Advisor → Escalation Agent → Human Approval
+
+Layer 6 — Application
+Streamlit web app → Revenue Q&A chat + Agent Dashboard
+```
 
 
 ## Tech Stack
