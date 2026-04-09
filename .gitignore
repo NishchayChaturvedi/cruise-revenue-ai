@@ -6,3 +6,6 @@ __pycache__/
 *.egg-info/
 dist/
 .mlflow/
+logs/
+mlruns/
+rag_pipeline/vectorstore/
