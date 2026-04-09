@@ -150,7 +150,7 @@ streamlit run app/main.py
 
 **Nishchay Chaturvedi**  
 Senior Manager, Data Analytics & Insights  
-[LinkedIn](https://linkedin.com/in/your-profile)  
+[LinkedIn](https://www.linkedin.com/in/nishchay-chaturvedi/)  
 [GitHub](https://github.com/NishchayChaturvedi)
 
 ---
