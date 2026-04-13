@@ -146,7 +146,12 @@ Rules:
   grouped by BRAND showing total revenue, total bookings, avg guest value
 - For "problem areas" query MART_OCCUPANCY for low occupancy or high cancellation
 - Never use SELECT * — always specify column names explicitly
-- When using aggregations always qualify column names with table alias"""
+- When using aggregations always qualify column names with table alias
+- For trend questions use MART_OCCUPANCY table only — it has SAIL_YEAR, 
+  SAIL_QUARTER, SAIL_MONTH columns already calculated
+- Never join tables unless absolutely necessary — single table queries 
+  are more reliable
+- For booking window questions use AVG_BOOKING_WINDOW_DAYS from MART_OCCUPANCY"""
 
     response = client.messages.create(
         model      = "claude-sonnet-4-5",
