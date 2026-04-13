@@ -202,16 +202,81 @@ format — never use the dollar sign symbol $ as it causes formatting issues."""
     return response.content[0].text.strip()
 
 
-def ask_with_sql(question):
-    """Full Text-to-SQL pipeline: question → SQL → results → answer."""
+def validate_question(question):
+    """Check if the question is answerable with available data."""
+    prompt = f"""You are a validator for a cruise revenue AI system.
+
+The system has access to NCLH internal data only:
+- Booking records for Norwegian, Oceania, and Regent brands
+- Occupancy and cancellation rates by itinerary and region
+- Guest profiles and lifetime value
+- Onboard spend by category
+- Pricing logs and variance
+
+It does NOT have access to:
+- Competitor data (Royal Caribbean, Carnival, MSC etc.)
+- Future forecasts or predictions
+- External market data
+- News or world events
+
+Is this question answerable with the available data?
+Question: "{question}"
+
+Reply in exactly this format:
+ANSWERABLE: yes or no
+REASON: one sentence
+SUGGESTION: if no, one alternative question they could ask instead"""
+
+    response = client.messages.create(
+        model      = "claude-sonnet-4-5",
+        max_tokens = 100,
+        messages   = [{"role": "user", "content": prompt}]
+    )
+    result = response.content[0].text.strip()
+
+    answerable = "yes" in result.lower().split("answerable:")[1].split("\n")[0].lower()
+    
     try:
+        reason     = result.split("REASON:")[1].split("\n")[0].strip()
+        suggestion = result.split("SUGGESTION:")[1].split("\n")[0].strip()
+    except Exception:
+        reason     = "Question may be outside available data scope."
+        suggestion = "Try asking about NCLH brand performance, occupancy, revenue, or pricing."
+
+    return answerable, reason, suggestion
+
+
+def ask_with_sql(question):
+    """Full Text-to-SQL pipeline with validation."""
+    try:
+        # Step 1 — validate question
+        answerable, reason, suggestion = validate_question(question)
+
+        if not answerable:
+            return (
+                f"I can't answer that with the available data. {reason} "
+                f"Try asking: '{suggestion}'",
+                "",
+                ""
+            )
+
+        # Step 2 — generate and run SQL
         sql          = generate_sql(question)
         cols, rows   = run_sql(sql)
         results_text = format_results(cols, rows)
-        answer       = synthesize_answer(question, sql, results_text)
+
+        # Step 3 — synthesize answer
+        answer = synthesize_answer(question, sql, results_text)
         return answer, sql, results_text
+
     except Exception as e:
-        return f"I wasn't able to answer that question. Error: {str(e)}", "", ""
+        return (
+            f"I ran into an issue answering that. "
+            f"Try rephrasing your question or ask about a specific brand, "
+            f"region, or metric. (Error: {str(e)})",
+            "",
+            ""
+        )
 
 
 if __name__ == "__main__":
