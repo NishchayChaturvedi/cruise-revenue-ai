@@ -219,6 +219,15 @@ It does NOT have access to:
 - External market data
 - News or world events
 
+IMPORTANT: Be generous in your interpretation. Questions using casual 
+language like "doing great", "performing well", "best", "worst", 
+"how are we doing" should be treated as ANSWERABLE by interpreting 
+them as questions about revenue, occupancy, or cancellation performance.
+
+Only mark as NOT ANSWERABLE if the question explicitly requires 
+competitor data, future predictions, or external information 
+that cannot exist in an internal booking database.
+
 Is this question answerable with the available data?
 Question: "{question}"
 
