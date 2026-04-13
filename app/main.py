@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from rag_pipeline.rag_assistant import retrieve
+from rag_pipeline.text_to_sql import ask_with_sql
 from agents.revenue_agents import detect_anomalies, generate_pricing_recommendation, escalate_for_approval
 import anthropic
 from dotenv import load_dotenv
@@ -57,6 +57,12 @@ with tab1:
     for message in st.session_state["messages"]:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
+            if message.get("sql"):
+                with st.expander("View SQL query"):
+                    st.code(message["sql"], language="sql")
+            if message.get("results"):
+                with st.expander("View raw data"):
+                    st.text(message["results"])
 
     question = st.chat_input("Ask a revenue question...")
 
@@ -72,36 +78,21 @@ with tab1:
             st.markdown(question)
 
         with st.chat_message("assistant"):
-            with st.spinner("Searching cruise data..."):
-                context_docs = retrieve(question)
-                context      = "\n".join([f"- {doc}" for doc in context_docs])
-
-                prompt = f"""You are a cruise revenue intelligence assistant for NCLH
-(Norwegian, Oceania, Regent brands).
-
-Relevant data from cruise revenue database:
-{context}
-
-Answer clearly with specific numbers. If data is insufficient, say so.
-
-Question: {question}
-Answer:"""
-
-                client   = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-                response = client.messages.create(
-                    model      = "claude-sonnet-4-5",
-                    max_tokens = 600,
-                    messages   = [{"role": "user", "content": prompt}]
-                )
-                answer = response.content[0].text
+            with st.spinner("Writing SQL query and fetching data from Snowflake..."):
+                answer, sql, results = ask_with_sql(question)
                 st.markdown(answer)
-
-                with st.expander("View source documents"):
-                    for i, doc in enumerate(context_docs):
-                        st.caption(f"Source {i+1}: {doc}")
+                if sql:
+                    with st.expander("View SQL query"):
+                        st.code(sql, language="sql")
+                if results:
+                    with st.expander("View raw data"):
+                        st.text(results)
 
         st.session_state["messages"].append({
-            "role": "assistant", "content": answer
+            "role":    "assistant",
+            "content": answer,
+            "sql":     sql,
+            "results": results
         })
 
 # ── Tab 2: Agent Dashboard ────────────────────────────────────────────────────
