@@ -14,9 +14,12 @@ A revenue analyst can:
 
 ## Demo
 
-**Revenue Q&A:**
-> "Which region has the highest cancellation rate?"
-> → "Americas has the highest cancellation rate at 13.45% for Oceania brand..."
+**Revenue Q&A (Text-to-SQL — Claude writes live Snowflake queries):**
+> "Which region is doing well?"
+> → "Alaska leads with USD 75.6M revenue from 5,520 bookings at USD 13,688 average per booking"
+
+> "How does Oceania pricing compare to Norwegian in the Caribbean?"
+> → "Oceania averages USD 7,355 vs Norwegian USD 2,762 — nearly 2.7x higher"
 
 **Anomaly Detection:**
 > Agent detects Regent Caribbean Classic at 68% occupancy with 31.82% cancellation rate
@@ -37,9 +40,9 @@ Cancellation Risk Classifier  →  AUC 0.83
 Revenue per Night Regressor   →  R²  0.99
 Upsell Propensity Classifier  →  AUC 0.82
 
-Layer 4 — RAG Pipeline
-Snowflake marts → 5,200 natural language documents
-→ ChromaDB vector store → Claude API → synthesized answers
+Layer 4 — Text-to-SQL + RAG Pipeline
+Natural language question → Claude generates SQL → Snowflake query → synthesized answer
+ChromaDB vector store used for agent context enrichment
 
 Layer 5 — Agentic AI (LangGraph)
 Anomaly Detector → Pricing Advisor → Escalation Agent → Human Approval
@@ -53,15 +56,14 @@ Streamlit web app → Revenue Q&A chat + Agent Dashboard
 
 | Layer | Technology |
 |-------|-----------|
-| Data Ingestion | Fivetran (simulated) + Python |
 | Data Warehouse | Snowflake |
 | Transformations | dbt Core |
 | ML Models | scikit-learn + MLflow |
 | Vector Store | ChromaDB |
+| Text-to-SQL | Claude (dynamic SQL generation) |
 | LLM | Anthropic Claude (claude-sonnet-4-5) |
 | Agents | LangGraph |
 | App | Streamlit |
-| Orchestration | Prefect |
 | Version Control | GitHub |
 
 ## Dataset
@@ -95,6 +97,7 @@ Synthetic dataset modeled after real cruise reservation systems:
 | `rag_pipeline/` | `generate_summaries.py` | Snowflake → documents |
 | `rag_pipeline/` | `build_vectorstore.py` | ChromaDB indexing |
 | `rag_pipeline/` | `rag_assistant.py` | RAG query engine |
+| `rag_pipeline/` | `text_to_sql.py` | Text-to-SQL query engine |
 | `agents/` | `revenue_agents.py` | LangGraph agent pipeline |
 | `app/` | `main.py` | Streamlit web app |
 
