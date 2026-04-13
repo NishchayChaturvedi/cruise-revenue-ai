@@ -140,7 +140,13 @@ Rules:
 - Return ONLY the SQL query, nothing else
 - No markdown, no backticks, no explanation
 - The query must be valid Snowflake SQL
-- Keep it simple and focused on answering the question directly"""
+- Keep it simple and focused on answering the question directly
+- Always use table aliases when joining tables to avoid ambiguous column errors
+- For vague questions like "how are we doing overall" query MART_REVENUE 
+  grouped by BRAND showing total revenue, total bookings, avg guest value
+- For "problem areas" query MART_OCCUPANCY for low occupancy or high cancellation
+- Never use SELECT * — always specify column names explicitly
+- When using aggregations always qualify column names with table alias"""
 
     response = client.messages.create(
         model      = "claude-sonnet-4-5",
