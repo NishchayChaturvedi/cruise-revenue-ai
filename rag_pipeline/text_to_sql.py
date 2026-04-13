@@ -151,7 +151,11 @@ Rules:
   SAIL_QUARTER, SAIL_MONTH columns already calculated
 - Never join tables unless absolutely necessary — single table queries 
   are more reliable
-- For booking window questions use AVG_BOOKING_WINDOW_DAYS from MART_OCCUPANCY"""
+- For booking window questions use AVG_BOOKING_WINDOW_DAYS from MART_OCCUPANCY
+- For pricing comparison questions use MART_PRICING_SUMMARY with these exact columns:
+  BRAND, REGION, CABIN_CATEGORY, LISTED_PRICE_USD, AVG_BOOKED_PRICE_USD, PRICE_VARIANCE_PCT, PRICE_POSITION
+- Never use AVG_CABIN_PRICE_USD — that column does not exist
+- For revenue and cabin price questions use MART_REVENUE with CABIN_PRICE_USD"""
 
     response = client.messages.create(
         model      = "claude-sonnet-4-5",
